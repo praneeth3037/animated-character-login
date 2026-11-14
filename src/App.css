@@ -1,0 +1,612 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  background-color: #040711;
+  color: #f8fafc;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.stage-viewport {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 20%, #0d1936 0%, #040711 82%);
+  transition: background 0.8s ease;
+}
+
+.stage-viewport.success {
+  background: radial-gradient(circle at 50% 20%, #064e3b 0%, #030c0e 85%);
+}
+
+.ambient-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 46px 46px;
+  pointer-events: none;
+}
+
+.floor-horizon {
+  position: absolute;
+  bottom: 15%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.25), transparent);
+  pointer-events: none;
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+.orb-left {
+  width: 380px;
+  height: 380px;
+  background: #2563eb;
+  top: 10%;
+  left: 12%;
+}
+
+.orb-right {
+  width: 340px;
+  height: 340px;
+  background: #7c3aed;
+  bottom: 12%;
+  right: 12%;
+}
+
+/* =========================================================
+   DUST PARTICLES ON CABLE PULL
+   ========================================================= */
+.dust-cloud {
+  position: absolute;
+  bottom: 15.5%;
+  right: 16%;
+  width: 280px;
+  height: 90px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 25;
+}
+
+.dust-cloud.grabbing {
+  opacity: 1;
+}
+
+.dust {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(226, 232, 240, 0.9), rgba(148, 163, 184, 0.2));
+  filter: blur(2px);
+  animation: dustBurst 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dust.d1 { width: 16px; height: 16px; bottom: 8px; right: 20px; animation-delay: 0.95s; }
+.dust.d2 { width: 22px; height: 22px; bottom: 14px; right: 50px; animation-delay: 1.02s; }
+.dust.d3 { width: 12px; height: 12px; bottom: 4px; right: 10px; animation-delay: 0.98s; }
+.dust.d4 { width: 18px; height: 18px; bottom: 18px; right: 90px; animation-delay: 1.08s; }
+.dust.d5 { width: 14px; height: 14px; bottom: 6px; right: 130px; animation-delay: 1.14s; }
+.dust.d6 { width: 20px; height: 20px; bottom: 12px; right: 170px; animation-delay: 1.2s; }
+
+@keyframes dustBurst {
+  0% { transform: translate(0, 0) scale(0.3); opacity: 0; }
+  25% { opacity: 0.95; }
+  100% { transform: translate(-140px, -48px) scale(2.2); opacity: 0; }
+}
+
+/* =========================================================
+   TENSION CABLE
+   ========================================================= */
+.pull-cable-svg {
+  position: absolute;
+  bottom: 92px;
+  left: 142px;
+  width: 175px;
+  height: 60px;
+  z-index: 21;
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: left center;
+}
+
+.pull-cable-svg.grabbing {
+  animation: cableHookAndPull 1.6s ease-out 0.85s forwards;
+}
+
+@keyframes cableHookAndPull {
+  0% { opacity: 0; transform: scaleX(0.2); }
+  15% { opacity: 1; transform: scaleX(1.05); }
+  85% { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(0.8); }
+}
+
+/* =========================================================
+   HUMANOID CHARACTER RIG & ANIMATIONS (POSITIONED ON LEFT)
+   ========================================================= */
+.character-actor {
+  position: absolute;
+  bottom: 15%;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  transition: left 0.8s ease, transform 0.8s ease;
+}
+
+.character-svg {
+  width: 195px;
+  height: 245px;
+  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.65));
+}
+
+.limb-leg-front { transform-origin: 115px 176px; }
+.calf-front { transform-origin: 118px 214px; }
+.limb-leg-back { transform-origin: 101px 176px; }
+.calf-back { transform-origin: 98px 214px; }
+
+.limb-arm-front { transform-origin: 112px 106px; }
+.forearm-front { transform-origin: 112px 148px; }
+.limb-arm-back { transform-origin: 98px 106px; }
+.forearm-back { transform-origin: 98px 148px; }
+.body-torso { transform-origin: 110px 176px; }
+
+/* Stage 1: Walking Entrance */
+.character-actor.entering {
+  left: -200px;
+  animation: walkToCenter 1.75s cubic-bezier(0.25, 0.9, 0.35, 1) forwards;
+}
+
+@keyframes walkToCenter {
+  0% { left: -200px; }
+  100% { left: calc(50% - 95px); }
+}
+
+.character-actor.entering .limb-leg-front,
+.character-actor.grabbing .limb-leg-front {
+  animation: thighSwing 0.4s ease-in-out infinite alternate;
+}
+.character-actor.entering .calf-front,
+.character-actor.grabbing .calf-front {
+  animation: kneeBend 0.4s ease-in-out infinite alternate;
+}
+.character-actor.entering .limb-leg-back,
+.character-actor.grabbing .limb-leg-back {
+  animation: thighSwing 0.4s ease-in-out infinite alternate-reverse;
+}
+.character-actor.entering .calf-back,
+.character-actor.grabbing .calf-back {
+  animation: kneeBend 0.4s ease-in-out infinite alternate-reverse;
+}
+.character-actor.entering .limb-arm-front {
+  animation: armSwing 0.4s ease-in-out infinite alternate-reverse;
+}
+.character-actor.entering .limb-arm-back {
+  animation: armSwing 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes thighSwing {
+  0% { transform: rotate(-22deg); }
+  100% { transform: rotate(24deg); }
+}
+@keyframes kneeBend {
+  0% { transform: rotate(20deg); }
+  100% { transform: rotate(3deg); }
+}
+@keyframes armSwing {
+  0% { transform: rotate(-20deg); }
+  100% { transform: rotate(22deg); }
+}
+
+/* Stage 2: Welcoming Wave */
+.character-actor.welcoming {
+  left: calc(50% - 95px);
+}
+.character-actor.welcoming .limb-arm-front {
+  transform: rotate(-122deg);
+  transition: transform 0.35s ease;
+}
+.character-actor.welcoming .forearm-front {
+  animation: forearmWave 0.45s ease-in-out infinite alternate;
+}
+@keyframes forearmWave {
+  0% { transform: rotate(-14deg); }
+  100% { transform: rotate(24deg); }
+}
+
+/* Stage 3: Cable Grab & Haul to Left Side of Card */
+.character-actor.grabbing {
+  animation: cableGrabAndHaul 2.55s cubic-bezier(0.25, 1, 0.45, 1) forwards;
+}
+
+@keyframes cableGrabAndHaul {
+  0% { left: calc(50% - 95px); }
+  30% { left: calc(100vw - 240px); }
+  100% { left: max(12px, calc(50% - 415px)); }
+}
+
+.character-actor.grabbing .body-torso {
+  animation: cablePullLean 2.55s ease-in-out forwards;
+}
+
+@keyframes cablePullLean {
+  0%, 28% { transform: rotate(7deg); }
+  38%, 88% { transform: rotate(-18deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.character-actor.grabbing .limb-arm-front,
+.character-actor.grabbing .limb-arm-back {
+  transform: rotate(-72deg);
+}
+
+/* Stage 4: Parked Cleanly on the Left Side of Login Card */
+.character-actor.ready,
+.character-actor.verifying {
+  left: max(12px, calc(50% - 415px));
+}
+
+.character-actor.ready .limb-arm-front {
+  transform: rotate(-72deg);
+  transition: transform 0.35s ease;
+}
+
+/* ERROR STATE: Touch head with both hands and sit down on the left side */
+.character-actor.error {
+  left: max(12px, calc(50% - 415px));
+  transform: translateY(28px);
+  transition: transform 0.4s ease;
+}
+
+.character-actor.error .limb-arm-front {
+  transform: rotate(-135deg) scale(0.9);
+  transition: transform 0.4s ease;
+}
+
+.character-actor.error .limb-arm-back {
+  transform: rotate(-110deg) scale(0.9);
+  transition: transform 0.4s ease;
+}
+
+.character-actor.error .body-torso {
+  transform: rotate(12deg);
+}
+
+/* SUCCESS STATE: Kick card from left side and walk off to hide on right */
+.character-actor.success {
+  animation: kickAndHide 1.8s cubic-bezier(0.25, 1, 0.45, 1) forwards;
+}
+
+@keyframes kickAndHide {
+  0% {
+    left: max(12px, calc(50% - 415px));
+    transform: rotate(0deg);
+  }
+  20% {
+    /* Steps in to kick the left edge of the card */
+    left: max(60px, calc(50% - 310px));
+    transform: rotate(-16deg);
+  }
+  38% {
+    left: max(60px, calc(50% - 310px));
+    transform: rotate(-16deg);
+  }
+  100% {
+    /* Walks off screen to hide on the right */
+    left: 130vw;
+    transform: rotate(0deg);
+  }
+}
+
+.character-actor.success .limb-leg-front {
+  transform: rotate(-68deg);
+  transition: transform 0.25s ease;
+}
+
+/* Speech Bubble */
+.speech-bubble {
+  position: relative;
+  max-width: 240px;
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1.5px solid rgba(56, 189, 248, 0.6);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.75), 0 0 20px rgba(56, 189, 248, 0.25);
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  animation: bubblePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.bubble-tail {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 14px;
+  height: 14px;
+  background: rgba(15, 23, 42, 0.96);
+  border-right: 1.5px solid rgba(56, 189, 248, 0.6);
+  border-bottom: 1.5px solid rgba(56, 189, 248, 0.6);
+}
+
+@keyframes bubblePop {
+  0% { opacity: 0; transform: scale(0.75) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* =========================================================
+   LOGIN CARD (SHIFTED SLIGHTLY RIGHT TO GIVE CHARACTER SPACE)
+   ========================================================= */
+.login-card-container {
+  position: relative;
+  width: 90%;
+  max-width: 400px;
+  margin-left: 140px;
+  padding: 36px 30px;
+  border-radius: 26px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 65px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  z-index: 15;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.8s ease;
+}
+
+.login-card-container.entering,
+.login-card-container.welcoming {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(120vw);
+}
+
+.login-card-container.grabbing {
+  visibility: visible;
+  opacity: 0;
+  transform: translateX(115vw);
+  animation: haulCardViaCable 1.48s cubic-bezier(0.25, 1, 0.45, 1) 1.05s forwards;
+}
+
+@keyframes haulCardViaCable {
+  0% { transform: translateX(115vw) rotate(4deg); opacity: 1; }
+  84% { transform: translateX(-14px) rotate(-1.5deg); opacity: 1; }
+  100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+}
+
+.login-card-container.ready,
+.login-card-container.verifying,
+.login-card-container.error {
+  visibility: visible;
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* SUCCESS: Card gets hit by leg and thrown to the right side */
+.login-card-container.success {
+  visibility: visible;
+  animation: hitAndThrowAway 1.2s cubic-bezier(0.25, 1, 0.45, 1) 0.22s forwards;
+}
+
+@keyframes hitAndThrowAway {
+  0% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  18% {
+    transform: translateX(-18px) rotate(-6deg);
+  }
+  100% {
+    transform: translateX(140vw) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+.cable-anchor-ring {
+  position: absolute;
+  left: -14px;
+  top: 52%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 36px;
+  border-radius: 8px 0 0 8px;
+  background: #475569;
+  border: 1.5px solid #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-inner {
+  width: 6px;
+  height: 18px;
+  border-radius: 99px;
+  background: #0f172a;
+}
+
+.login-card-container.error {
+  border-color: rgba(244, 63, 94, 0.85);
+  box-shadow: 0 0 45px rgba(244, 63, 94, 0.45);
+  animation: cardShake 0.45s ease-in-out;
+}
+
+@keyframes cardShake {
+  0%, 100% { transform: translateX(0); }
+  25%, 75% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+}
+
+/* Form Typography & Controls */
+.card-header {
+  margin-bottom: 24px;
+}
+
+.pill-tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 4px 10px;
+  border-radius: 99px;
+  margin-bottom: 12px;
+}
+
+.card-header h1 {
+  font-size: 25px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 6px;
+}
+
+.card-header p {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.card-header strong {
+  color: #e2e8f0;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.field-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.field-group input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  border-radius: 13px;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: rgba(2, 6, 23, 0.55);
+  color: #fff;
+  font-size: 14.5px;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.field-group input:focus {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.07);
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16);
+}
+
+.primary-btn {
+  width: 100%;
+  height: 50px;
+  margin-top: 8px;
+  border-radius: 13px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primary-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.65);
+}
+
+.primary-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loader-ring {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.success-panel {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.check-badge {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.16);
+  border: 2px solid #10b981;
+  color: #34d399;
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.45);
+}
+
+.success-panel h2 {
+  font-size: 24px;
+  color: #ecfdf5;
+  margin-bottom: 8px;
+}
+
+.success-panel p {
+  font-size: 14px;
+  color: #a7f3d0;
+  margin-bottom: 24px;
+}
+
+.secondary-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
